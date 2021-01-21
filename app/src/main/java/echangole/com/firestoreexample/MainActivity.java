@@ -16,10 +16,12 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -77,6 +79,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else
                     {
+                        textViewTitle.setText("");
+                        textViewDesc.setText("");
 
 
                     }
@@ -153,6 +157,29 @@ public class MainActivity extends AppCompatActivity {
            }
        });
 
+
+    }
+
+    public void updateDesc(View view)
+    {
+        String description=editTextDescription.getText().toString().trim();
+        Map<String,Object> note=new HashMap<>();
+        note.put(KEY_DESCRIPTION,description);
+        noteRef.update(note);
+    }
+
+    public void deleteRecord(View view)
+    {
+        noteRef.delete();
+
+
+    }
+
+    public void deleteDesc(View view)
+    {
+       Map<String,Object> note=new HashMap<>();
+       note.put(KEY_DESCRIPTION, FieldValue.delete());
+       noteRef.update(note);
 
     }
 }

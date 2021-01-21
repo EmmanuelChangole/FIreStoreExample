@@ -41,7 +41,31 @@
     android:layout_marginBottom="20dp"
 
     />
-   <TextView
+   <Button
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:text="Update description."
+       android:onClick="updateDesc"
+       android:layout_marginBottom="20dp"
+
+       />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Delete desc."
+        android:onClick="deleteDesc"
+        android:layout_marginBottom="20dp"
+        />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Delete Note."
+        android:onClick="deleteRecord"
+        android:layout_marginBottom="20dp"
+        />
+
+
+    <TextView
        android:id="@+id/textViewTitle"
        android:layout_width="match_parent"
        android:layout_height="wrap_content"

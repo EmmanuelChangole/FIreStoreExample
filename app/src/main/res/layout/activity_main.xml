@@ -29,7 +29,7 @@
      android:layout_height="wrap_content"
      android:background="@color/green"
      android:text="save"
-     android:onClick="saveNote"
+     android:onClick="addNote"
      android:layout_marginBottom="20dp"
      />
 <Button
@@ -41,46 +41,25 @@
     android:layout_marginBottom="20dp"
 
     />
-   <Button
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       android:text="Update description."
-       android:onClick="updateDesc"
-       android:layout_marginBottom="20dp"
 
-       />
-    <Button
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Delete desc."
-        android:onClick="deleteDesc"
-        android:layout_marginBottom="20dp"
-        />
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Delete Note."
-        android:onClick="deleteRecord"
-        android:layout_marginBottom="20dp"
-        />
+        android:layout_height="match_parent">
+
+        <TextView
+            android:textColor="@color/white"
+            android:id="@+id/textViewData"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:textSize="20sp"
+
+            />
+
+    </androidx.core.widget.NestedScrollView>
 
 
-    <TextView
-       android:id="@+id/textViewTitle"
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       android:layout_marginBottom="20dp"
-       android:textSize="20sp"
 
-       />
-
-    <TextView
-        android:id="@+id/textViewDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
-        android:textSize="20sp"
-        />
 
 
 </LinearLayout>

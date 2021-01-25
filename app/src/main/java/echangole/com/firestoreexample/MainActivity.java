@@ -20,6 +20,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -31,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String KEY_TITLE="title";
     public static final String KEY_DESCRIPTION="description";
 
-    private EditText editTextTitle,editTextDescription;
+    private EditText editTextTitle,editTextDescription,editTextPriority;
     private TextView textViewData;
 
     private FirebaseFirestore db=FirebaseFirestore.getInstance();
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
         editTextTitle=(EditText)findViewById(R.id.editTextTitle);
         editTextDescription=(EditText)findViewById(R.id.editTextDescription);
+        editTextPriority=(EditText)findViewById(R.id.editTextPriority);
         textViewData=(TextView)findViewById(R.id.textViewData);
 
 
@@ -79,8 +81,14 @@ public class MainActivity extends AppCompatActivity {
     {
         String title=editTextTitle.getText().toString().trim();
         String description=editTextDescription.getText().toString().trim();
+        if(editTextPriority.length()==0)
+        {
+            editTextPriority.setText("0");
+        }
+        int priority=Integer.parseInt(editTextPriority.getText().toString());
 
-        Note note=new Note(title,description);
+
+        Note note=new Note(title,description,priority);
 
 
 //        Map<String,Object> note=new HashMap<>();
@@ -106,7 +114,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void loadNote(View view)
     {
-      bookRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+      bookRef.whereGreaterThanOrEqualTo("priority",2)
+              .limit(4)
+              .orderBy("priority", Query.Direction.ASCENDING)
+              .get()
+              .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
           @Override
           public void onSuccess(QuerySnapshot queryDocumentSnapshots)
           {
@@ -132,7 +144,10 @@ public class MainActivity extends AppCompatActivity {
             Note note=documentSnapshot.toObject(Note.class);
             String title=note.getTitle();
             String description=note.getDescription();
-            data+="Title: "+title+"\n"+"Description: "+description+"\n\n";
+            int priority=note.getPriority();
+
+            data+="Title: "+title+"\n"+"Description: "+description+"\n Priority: "+priority
+                    +"\n\n";
 
         }
         textViewData.setText(data);

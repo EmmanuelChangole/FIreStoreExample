@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -25,12 +27,14 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     public static final String Tag=MainActivity.class.getName();
     public static final String KEY_TITLE="title";
     public static final String KEY_DESCRIPTION="description";
+    private   String data="";
 
     private EditText editTextTitle,editTextDescription,editTextPriority;
     private TextView textViewData;
@@ -114,31 +118,26 @@ public class MainActivity extends AppCompatActivity {
 
     public void loadNote(View view)
     {
-      bookRef.whereGreaterThanOrEqualTo("priority",2)
-              .limit(4)
-              .orderBy("priority", Query.Direction.ASCENDING)
-              .get()
-              .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-          @Override
-          public void onSuccess(QuerySnapshot queryDocumentSnapshots)
-          {
-              loadData(queryDocumentSnapshots);
+     Task task1= bookRef.whereLessThan("priority",2).orderBy("priority").get();
+     Task task2=bookRef.whereGreaterThan("priority",2).orderBy("priority").get();
 
-          }
-      }).addOnFailureListener(new OnFailureListener() {
-          @Override
-          public void onFailure(@NonNull Exception e) {
-              Toast.makeText(MainActivity.this, "Something went wrong", Toast.LENGTH_SHORT).show();
-              Log.d(Tag,e.getMessage());
-          }
-      });
+     Task<List<QuerySnapshot>> allTask= Tasks.whenAllSuccess(task1,task2);
+     allTask.addOnSuccessListener(new OnSuccessListener<List<QuerySnapshot>>() {
+         @Override
+         public void onSuccess(List<QuerySnapshot> querySnapshots)
+         {
+             for(QuerySnapshot queryDocumentSnapshots:querySnapshots)
+             {
+                 loadData(queryDocumentSnapshots);
+             }
 
-
+         }
+     });
     }
 
     private void loadData(QuerySnapshot queryDocumentSnapshots)
     {
-        String data="";
+
         for(QueryDocumentSnapshot documentSnapshot:queryDocumentSnapshots)
         {
             Note note=documentSnapshot.toObject(Note.class);

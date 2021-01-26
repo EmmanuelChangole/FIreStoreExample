@@ -34,14 +34,18 @@ public class MainActivity extends AppCompatActivity {
     public static final String Tag=MainActivity.class.getName();
     public static final String KEY_TITLE="title";
     public static final String KEY_DESCRIPTION="description";
-    private   String data="";
+
 
     private EditText editTextTitle,editTextDescription,editTextPriority;
     private TextView textViewData;
 
+    private DocumentSnapshot lastResult;
+
+
+
     private FirebaseFirestore db=FirebaseFirestore.getInstance();
     private CollectionReference bookRef=db.collection("Notebook");
-    private DocumentReference noteRef=db.collection("Notebook").document("My first Note");
+   // private DocumentReference noteRef=db.collection("Notebook").document("My first Note");
 
 
 
@@ -56,30 +60,8 @@ public class MainActivity extends AppCompatActivity {
         editTextPriority=(EditText)findViewById(R.id.editTextPriority);
         textViewData=(TextView)findViewById(R.id.textViewData);
 
-
-
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        bookRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                if (e != null)
-                {
-                    return;
-                }
-
-                loadData(queryDocumentSnapshots);
-            }
-        });
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
 
     public void addNote(View view)
     {
@@ -118,25 +100,30 @@ public class MainActivity extends AppCompatActivity {
 
     public void loadNote(View view)
     {
-     Task task1= bookRef.whereLessThan("priority",2).orderBy("priority").get();
-     Task task2=bookRef.whereGreaterThan("priority",2).orderBy("priority").get();
+        Query query;
+        if(lastResult==null)
+        {
+            query=bookRef.orderBy("priority").limit(3);
+        }
+        else
+            {
+                query=bookRef.orderBy("priority").startAfter(lastResult).limit(3);
 
-     Task<List<QuerySnapshot>> allTask= Tasks.whenAllSuccess(task1,task2);
-     allTask.addOnSuccessListener(new OnSuccessListener<List<QuerySnapshot>>() {
-         @Override
-         public void onSuccess(List<QuerySnapshot> querySnapshots)
-         {
-             for(QuerySnapshot queryDocumentSnapshots:querySnapshots)
-             {
-                 loadData(queryDocumentSnapshots);
-             }
+            }
+        query.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots)
+            {
+                loadData(queryDocumentSnapshots);
 
-         }
-     });
+            }
+        });
+
     }
 
     private void loadData(QuerySnapshot queryDocumentSnapshots)
     {
+          String data="";
 
         for(QueryDocumentSnapshot documentSnapshot:queryDocumentSnapshots)
         {
@@ -149,13 +136,21 @@ public class MainActivity extends AppCompatActivity {
                     +"\n\n";
 
         }
-        textViewData.setText(data);
+        if(queryDocumentSnapshots.size()>0)
+        {
+            data+="________\n\n";
+            textViewData.append(data);
+            lastResult=queryDocumentSnapshots.getDocuments().get(queryDocumentSnapshots.size()-1);
+        }
+
+
+
 
 
     }
 
 
-    public void updateDesc(View view)
+  /*  public void updateDesc(View view)
     {
         String description=editTextDescription.getText().toString().trim();
         Map<String,Object> note=new HashMap<>();
@@ -176,5 +171,5 @@ public class MainActivity extends AppCompatActivity {
        note.put(KEY_DESCRIPTION, FieldValue.delete());
        noteRef.update(note);
 
-    }
+    }*/
 }

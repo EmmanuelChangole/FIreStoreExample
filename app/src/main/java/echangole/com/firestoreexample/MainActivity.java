@@ -16,6 +16,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -62,6 +63,45 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+        bookRef.addSnapshotListener(this, new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                if(e!=null)
+                {
+                    Log.d(Tag,e.getMessage());
+                    return;
+                }
+
+               for(DocumentChange dc:queryDocumentSnapshots.getDocumentChanges())
+               {
+                   DocumentSnapshot documentSnapshot=dc.getDocument();
+                   String id=documentSnapshot.getId();
+                   int oldIndex=dc.getOldIndex();
+                   int newIndex=dc.getNewIndex();
+                   switch (dc.getType())
+                   {
+                       case ADDED:
+                           textViewData.append("\n added"+id+"\n old index"+oldIndex+"New index"+newIndex);
+                           break;
+                       case MODIFIED:
+                           textViewData.append("\n Modified"+id+ "\n Old index"+oldIndex+"\n new index"+newIndex);
+                           break;
+                       case REMOVED:
+                           textViewData.append("\n Removed"+id+"\n oldindex"+oldIndex+"\n new index"+newIndex);
+                           break;
+
+                   }
+
+               }
+
+            }
+        });
+
+    }
 
     public void addNote(View view)
     {

@@ -26,6 +26,8 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Transaction;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +62,30 @@ public class MainActivity extends AppCompatActivity {
         editTextDescription=(EditText)findViewById(R.id.editTextDescription);
         editTextPriority=(EditText)findViewById(R.id.editTextPriority);
         textViewData=(TextView)findViewById(R.id.textViewData);
+       // executeBatchedwrite();
+         executeTransaction();
+
+
+    }
+
+    private void executeBatchedwrite()
+    {
+        WriteBatch writeBatch=db.batch();
+        DocumentReference doc1=bookRef.document("New Note");
+        writeBatch.set(doc1,new Note("new note","note desc",1));
+        DocumentReference doc2=bookRef.document("Not existing document");
+        writeBatch.update(doc2,"title","updated note");
+        DocumentReference doc3=bookRef.document("swefdtefgfgftes");
+        writeBatch.delete(doc3);
+        DocumentReference doc4=bookRef.document();
+        writeBatch.set(doc4,new Note("Added Note","Added note desc",2));
+        writeBatch.commit().addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.d(Tag,e.getMessage());
+            }
+        });
 
     }
 
@@ -155,6 +181,34 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(QuerySnapshot queryDocumentSnapshots)
             {
                 loadData(queryDocumentSnapshots);
+
+            }
+        });
+
+    }
+
+    private void executeTransaction()
+    {
+        db.runTransaction(new Transaction.Function<Long>()
+        {
+
+            @Nullable
+            @Override
+            public Long apply(@NonNull Transaction transaction) throws FirebaseFirestoreException
+            {
+                DocumentReference exampleNoteRef=bookRef.document("ExampleNote");
+                DocumentSnapshot exampleNoteSnapShot=transaction.get(exampleNoteRef);
+                long newPriority=exampleNoteSnapShot.getLong("priority")+1;
+                transaction.update(exampleNoteRef,"priority",newPriority);
+
+
+                return newPriority;
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Long>() {
+            @Override
+            public void onSuccess(Long result )
+            {
+                Toast.makeText(MainActivity.this, "new priority "+result, Toast.LENGTH_SHORT).show();
 
             }
         });

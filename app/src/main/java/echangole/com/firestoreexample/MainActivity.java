@@ -29,6 +29,8 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
 import com.google.firebase.firestore.WriteBatch;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,10 +41,10 @@ public class MainActivity extends AppCompatActivity {
     public static final String KEY_DESCRIPTION="description";
 
 
-    private EditText editTextTitle,editTextDescription,editTextPriority;
+    private EditText editTextTitle,editTextDescription,editTextPriority,editTextTags;
     private TextView textViewData;
 
-    private DocumentSnapshot lastResult;
+  //  private DocumentSnapshot lastResult;
 
 
 
@@ -61,14 +63,17 @@ public class MainActivity extends AppCompatActivity {
         editTextTitle=(EditText)findViewById(R.id.editTextTitle);
         editTextDescription=(EditText)findViewById(R.id.editTextDescription);
         editTextPriority=(EditText)findViewById(R.id.editTextPriority);
+        editTextTags=(EditText)findViewById(R.id.editTextTag);
         textViewData=(TextView)findViewById(R.id.textViewData);
        // executeBatchedwrite();
          executeTransaction();
+        // updateArray();
 
+        updateNestedValue();
 
     }
 
-    private void executeBatchedwrite()
+   /* private void executeBatchedwrite()
     {
         WriteBatch writeBatch=db.batch();
         DocumentReference doc1=bookRef.document("New Note");
@@ -88,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-
+*/
     @Override
     protected void onStart()
     {
@@ -132,7 +137,16 @@ public class MainActivity extends AppCompatActivity {
     public void addNote(View view)
     {
         String title=editTextTitle.getText().toString().trim();
+        String tagInput=editTextTags.getText().toString().trim();
         String description=editTextDescription.getText().toString().trim();
+        String[] tagArray=tagInput.split("\\s*,\\s*");
+        Map<String,Boolean> tags= new HashMap<>();
+        for(String tag:tagArray)
+        {
+            tags.put(tag,true);
+
+        }
+
         if(editTextPriority.length()==0)
         {
             editTextPriority.setText("0");
@@ -140,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
         int priority=Integer.parseInt(editTextPriority.getText().toString());
 
 
-        Note note=new Note(title,description,priority);
+        Note note=new Note(title,description,priority,tags);
 
 
 //        Map<String,Object> note=new HashMap<>();
@@ -163,10 +177,51 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+    private void updateArray()
+    {
+        bookRef.document("uO8mtHukJGsvEDjbS77W").update("tags",FieldValue.arrayRemove("new Tag"));
+
+    }
+
+    public void updateNestedValue()
+    {
+        bookRef.document("gD7pzD0lfHVCjDdftvC7").update("tags.tag1.nested1.nested2",true);
+
+
+    }
 
     public void loadNote(View view)
     {
-        Query query;
+        bookRef.whereEqualTo("tags.tag1",true).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                String data="";
+                for(QueryDocumentSnapshot queryDocumentSnapshot:queryDocumentSnapshots)
+                {
+                    Note  note=queryDocumentSnapshot.toObject(Note.class);
+                    note.setId(queryDocumentSnapshot.getId());
+                    String documentID=note.getId();
+                    data+="ID"+documentID;
+                    for(String tag:note.getTags().keySet() )
+                    {
+                        data+="\n-"+tag;
+
+                    }
+
+                    data+="\n \n";
+
+
+
+
+                }
+
+                textViewData.setText(data);
+            }
+        });
+
+
+
+       /* Query query;
         if(lastResult==null)
         {
             query=bookRef.orderBy("priority").limit(3);
@@ -183,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
                 loadData(queryDocumentSnapshots);
 
             }
-        });
+        });*/
 
     }
 
@@ -234,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
         {
             data+="________\n\n";
             textViewData.append(data);
-            lastResult=queryDocumentSnapshots.getDocuments().get(queryDocumentSnapshots.size()-1);
+           // lastResult=queryDocumentSnapshots.getDocuments().get(queryDocumentSnapshots.size()-1);
         }
 
 

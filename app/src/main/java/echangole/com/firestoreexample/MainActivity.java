@@ -155,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         Note note=new Note(title,description,priority,tags);
+        bookRef.document("gD7pzD0lfHVCjDdftvC7").collection("childNode").add(note);
 
 
 //        Map<String,Object> note=new HashMap<>();
@@ -192,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void loadNote(View view)
     {
-        bookRef.whereEqualTo("tags.tag1",true).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        bookRef.document("gD7pzD0lfHVCjDdftvC7").collection("childNode").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 String data="";
